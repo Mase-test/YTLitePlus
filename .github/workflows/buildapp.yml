@@ -167,6 +167,11 @@ jobs:
         id: build_package
         run: |
           cd ${{ github.workspace }}/main
+          
+          # Fix YTUHD compilation errors on newer Xcode
+          sed -i '' '1i\
+          YTUHD_CFLAGS = -fno-modules' Tweaks/YTUHD/Makefile
+
           # Replace lines in Makefile based on inputs
           sed -i '' "s/^BUNDLE_ID.*$/BUNDLE_ID = ${{ env.BUNDLE_ID }}/" Makefile
           sed -i '' "s/^DISPLAY_NAME.*$/DISPLAY_NAME = ${{ env.APP_NAME }}/" Makefile
