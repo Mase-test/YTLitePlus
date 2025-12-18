@@ -168,10 +168,14 @@ jobs:
         run: |
           cd ${{ github.workspace }}/main
           
-          # Fix YTUHD compilation errors (Prepend safely)
-          echo "YTUHD_CFLAGS = -fno-modules" > Tweaks/YTUHD/Makefile.tmp
-          cat Tweaks/YTUHD/Makefile >> Tweaks/YTUHD/Makefile.tmp
-          mv Tweaks/YTUHD/Makefile.tmp Tweaks/YTUHD/Makefile
+          # Fix YTUHD compilation errors (Double fix: Imports + Makefile flags)
+          # 1. Inject missing headers into Tweak.xm to fix "declaration must be imported"
+          sed -i '' '1i\
+          #import <Foundation/Foundation.h>\
+          #import <string.h>' Tweaks/YTUHD/Tweak.xm
+          
+          # 2. Disable modules safely by inserting flag before the include line using Perl
+          perl -pi -e 's/include \$\(THEOS_MAKE_PATH\)\/tweak.mk/YTUHD_CFLAGS += -fno-modules\n$&/' Tweaks/YTUHD/Makefile
 
           # Replace lines in Makefile based on inputs
           sed -i '' "s/^BUNDLE_ID.*$/BUNDLE_ID = ${{ env.BUNDLE_ID }}/" Makefile
