@@ -168,9 +168,10 @@ jobs:
         run: |
           cd ${{ github.workspace }}/main
           
-          # Fix YTUHD compilation errors on newer Xcode
-          sed -i '' '1i\
-          YTUHD_CFLAGS = -fno-modules' Tweaks/YTUHD/Makefile
+          # Fix YTUHD compilation errors (Prepend safely)
+          echo "YTUHD_CFLAGS = -fno-modules" > Tweaks/YTUHD/Makefile.tmp
+          cat Tweaks/YTUHD/Makefile >> Tweaks/YTUHD/Makefile.tmp
+          mv Tweaks/YTUHD/Makefile.tmp Tweaks/YTUHD/Makefile
 
           # Replace lines in Makefile based on inputs
           sed -i '' "s/^BUNDLE_ID.*$/BUNDLE_ID = ${{ env.BUNDLE_ID }}/" Makefile
